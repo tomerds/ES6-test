@@ -29,7 +29,6 @@ jobs:
 
       - name: Overwrite hardhat config
         uses: actions/github-script@v6
-        working-directory: ${{ inputs.base-directory }}
         id: solidity-version
         with:
           script: |
