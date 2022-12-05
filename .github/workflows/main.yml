@@ -26,3 +26,61 @@ jobs:
 
       - name: Run test
         run: node index.js
+
+       - name: Overwrite hardhat config
+        uses: actions/github-script@v6
+        working-directory: ${{ inputs.base-directory }}
+        id: solidity-version
+        with:
+          script: |
+            const { readFileSync, writeFileSync, existsSync } = require("fs");
+
+            let userConfig;
+
+            const configPath = existsSync("./hardhat.config.ts")
+              ? "./hardhat.config.ts"
+              : "./hardhat.config.js";
+
+            userConfig = readFileSync(configPath, "utf-8");
+
+            const config = userConfig
+              .split("\n")
+              .filter(
+                (line) =>
+                  !line.includes("require") &&
+                  (!line.includes("import") || line.includes("HardhatUserConfig"))
+              )
+              .join("\r\n");
+
+            writeFileSync(configPath, config)
+
+            userConfig = require(configPath, "utf-8")
+
+            const userSolidity = userConfig?.solidity;
+            if(userSolidity == undefined) {
+              console.log('no sol found');
+              return;
+            }
+
+            const contents = `
+            require("@nomicfoundation/hardhat-toolbox");
+
+            module.exports = {
+                    solidity: ${JSON.stringify(userSolidity)},
+                    paths: {
+                      artifacts: "./artifacts",
+                    },
+                    networks: {
+                      goerli: {
+                        url: "https://goerli.infura.io/v3/${RPC_KEY}",
+                        accounts: ["${PRIVATE_KEY}"],
+                      },
+                    },
+                    etherscan: {
+                      apiKey: "${ETHERSCAN_API_KEY}",
+                    },
+                  };`
+
+            writeFileSync(`./new.config.ts`, contents, function (err, result) {
+              if (err) console.log("error", err);
+            });
