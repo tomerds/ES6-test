@@ -1,5 +1,5 @@
 import { readFileSync, writeFileSync, existsSync } from "fs";
-import config from "./hardhat.config.ts";
+import config from "./hardhat.config";
 
 const test = () => {
   //   const userSolidity = config?.solidity;
