@@ -24,8 +24,5 @@ jobs:
       - name: Install for3st dependencies
         run: npm i
 
-      # - name: Run test
-      #   run: node index.js
-
-      - name: Test file names
-        uses: ./test.yml
+      - name: Run test
+        run: node index.js
